@@ -43,15 +43,25 @@ namespace ConsoleApp1
                     Console.WriteLine("Invalid Input");
                     continue;
                 }
-                // 문자열의 0번째 요소는 RH 값으로, 1번째 요소는 T 값으로 변환하기 위해 double로 형 변환
+                
                 else
                 {
-                    RH = double.Parse(input[0]);
-                    T = double.Parse(input[1]);
-                }
+                    // 문자열의 0번째 요소는 RH 값으로, 1번째 요소는 T 값으로 변환하기 위해 double로 형 변환
+                    // 입력 문자열이 double 형으로 변환할 수 있는 문자열인지 검증하는 함수 TryParse 사용
+                    // 변환 성공 시 true를 반환하며 각 변수에 변환된 값이 저장된다.
+                    // 변환 실패 시 오류 출력
+                    if (!double.TryParse(input[0], out RH)) {
+                        Console.WriteLine("Invalid Input");
+                        continue;
+                    }
 
-                // 이슬점 계산하는 메서드 출력하여 계산 후 계산 결과를 출력
-                Console.WriteLine("Dew Point : {0}\n", CalculateDewPoint(RH, T));
+                    if (!double.TryParse(input[1], out T)) {
+                        Console.WriteLine("Invalid Input");
+                        continue;
+                    }
+                    
+                    Console.WriteLine("Dew Point : {0}", CalculateDewPoint(RH, T));
+                }
             }
         }
     }
