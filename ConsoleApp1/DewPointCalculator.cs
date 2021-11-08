@@ -2,13 +2,13 @@
 
 namespace ConsoleApp1
 {
-    class DewPointCalculator
+    class Calculator
     {
-        private double temperature; // fahrenheit
+        protected double temperature; // fahrenheit
 
-        private double relativeHumidity; // %
+        protected double relativeHumidity; // %
 
-        private double value; // DewPoint 값
+        protected double value; // DewPoint 값
 
         public double Temperature
         {
@@ -46,12 +46,52 @@ namespace ConsoleApp1
             }
         }
 
+        public virtual void Calculate()
+        {
+            return;
+        }
+        
+        public static double CelsiusToFahrenheit(double c)
+        {
+            return 1.8f * c + 32;
+        }
+        
+        public static double FahrenheitToCelsius(double f)
+        {
+            return (f - 32) * 5 / 9;
+        }
+        
+        // 사용자로부터 화씨 온도와 상대습도 입력받기
+        public void GetUserInput()
+        {
+            String input;
+            
+            Console.WriteLine("Please enter temperature (F) >>");
+            input = Console.Read().ToString();
+            Double.TryParse(input, out temperature);
+            
+            Console.WriteLine("Please enter relative humidity (%) >>");
+            input = Console.Read().ToString();
+            Double.TryParse(input, out relativeHumidity);
+            
+            Calculate();
+        }
+        
+        // 이슬점 테이블 출력
+        public static void PrintTable()
+        {
+            
+        }
+    }
+    
+    class DewPointCalculator : Calculator
+    {
         DewPointCalculator()
         {
             Console.WriteLine("Calculate DewPoint");    
         }
         
-        public void Calculate()
+        public override void Calculate()
         {
              value = 243.12 * (Math.Log(relativeHumidity / 100) + 17.62 * temperature / (243.12 + temperature)) /
                     (17.62 - (Math.Log(relativeHumidity / 100) + 17.62 * temperature / (243.12 + temperature)));
@@ -71,46 +111,13 @@ namespace ConsoleApp1
             return Math.Round(CelsiusToFahrenheit(dewPoint), 1);
         }
         
-        // 단위 환산을 위한 메서드
-        public static double CelsiusToFahrenheit(double c)
-        {
-            return 1.8f * c + 32;
-        }
-        
-        public static double FahrenheitToCelsius(double f)
-        {
-            return (f - 32) * 5 / 9;
-        }
-        
-        // 사용자가 입력한 
+        // 객체의 요소를 출력
         public override String ToString()
         {
             return String.Format("DewPointCalculator [Temperature={0}, RelativeHumidity={1}, Value={2}]",
                 temperature, relativeHumidity, value);
         }
 
-        public void GetUserInput()
-        {
-            double temperature, relativeHumidity;
-            String input;
-            
-            Console.WriteLine("Please enter temperature (F) >>");
-            input = Console.Read().ToString();
-            Double.TryParse(input, out temperature);
-            
-            Console.WriteLine("Please enter relative humidity (%) >>");
-            input = Console.Read().ToString();
-            Double.TryParse(input, out relativeHumidity);
-            
-            Calculate();
-        }
-        
-        // 이슬점 테이블 출력
-        public static void PrintTable()
-        {
-            
-        }
-        
         static void Main(string[] args)
         {
             // 변수 선언
@@ -158,5 +165,10 @@ namespace ConsoleApp1
                 }
             }
         }
+    }
+
+    class WindChillTemperatureCalculator : Calculator
+    {
+        
     }
 }
