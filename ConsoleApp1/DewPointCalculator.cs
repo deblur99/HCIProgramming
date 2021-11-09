@@ -1,11 +1,11 @@
 ﻿using System;
-using System.Runtime.CompilerServices;
-using ConsoleApp1;
 
 namespace ConsoleApp1
 {
     class Calculator
     {
+        private int type;
+        
         protected double temperature; // fahrenheit
 
         protected double relativeHumidity; // %
@@ -35,6 +35,11 @@ namespace ConsoleApp1
             set { this.value = value; }
         }
 
+        public Calculator()
+        {
+            return;
+        }
+
         public virtual void Calculate()
         {
             return;
@@ -51,19 +56,9 @@ namespace ConsoleApp1
         }
 
         // 사용자로부터 화씨 온도와 상대습도 입력받기
-        public void GetUserInput()
+        public virtual void GetUserInput()
         {
-            String input;
-
-            Console.WriteLine("Please enter temperature (F) >>");
-            input = Console.Read().ToString();
-            Double.TryParse(input, out temperature);
-
-            Console.WriteLine("Please enter relative humidity (%) >>");
-            input = Console.Read().ToString();
-            Double.TryParse(input, out relativeHumidity);
-
-            Calculate();
+            return;
         }
 
         // 이슬점 테이블 출력
@@ -72,12 +67,49 @@ namespace ConsoleApp1
             return;
         }
 
+        public static Calculator GetCalculator()
+        {
+            string decision = "";
+            int mode = -1;
+            
+            Console.Write("Please enter mode [1: DP, 2: WCT] >>"); 
+            int.TryParse(Console.Read().ToString(), out mode);
+            
+            switch (mode)
+            {
+                case 1:
+                    return new DewPointCalculator();
+                case 2:
+                    return new WindChillTemperatureCalculator();
+                default:
+                    return null;
+            }
+        }
+        
+        // 사용자의 입력에 따라 필요한 계산기 객체 반환
+        public static Calculator GetCalculatorAfterTask()
+        {
+            int decision = GetDecisionToContinue();
+
+            switch (decision)
+            {
+                case 0:
+                    break;
+                case 1:
+                    return new DewPointCalculator();
+                case 2:
+                    return new WindChillTemperatureCalculator();
+            }
+
+            return null;
+        }
+
         // 사용자에게 계속 계산할지 여부를 묻는 메서드 
         // 0, 1, 2 중 하나를 반환한다.
         // 0 : 프로그램 종료
         // 1 : DP 계산기 실행
         // 2 : WCT 계산기 실행
-        public int GetDecisionToContinue()
+        public static int GetDecisionToContinue()
         {
             string decision;
 
@@ -86,6 +118,7 @@ namespace ConsoleApp1
 
             if (decision.Equals("q") || decision.Equals("Q"))
             {
+                Console.WriteLine("done..");
                 return 0;
             }
 
@@ -223,10 +256,27 @@ namespace ConsoleApp1
             return String.Format("DewPointCalculator [Temperature={0}, RelativeHumidity={1}, Value={2}]",
                 temperature, relativeHumidity, value);
         }
+
+        public override void GetUserInput()
+        {
+            string input;
+
+            Console.WriteLine("Please enter temperature (F) >>");
+            input = Console.Read().ToString();
+            Double.TryParse(input, out temperature);
+
+            Console.WriteLine("Please enter relative humidity (%) >>");
+            input = Console.Read().ToString();
+            Double.TryParse(input, out relativeHumidity);
+
+            Calculate();
+        }
     }
 
     class WindChillTemperatureCalculator : Calculator
     {
+        private double windVelocity; // mph
+
         private string[,] _windChillTemperatureTable = new string[13,19];
         
         // row
@@ -273,7 +323,31 @@ namespace ConsoleApp1
         {
             Console.WriteLine("Calculate WindChillTemperatureCalculator");
         }
+        
+        public double WindVelocity
+        {
+            get
+            {
+                return windVelocity;  
+            }
+            set
+            {
+                windVelocity = value;    
+            }
+        }
 
+        public override string ToString()
+        {
+            return String.Format("WindChillTemperatureCalculator [Temperature={0}, WindVelocity={1}, Value={2}]",
+                temperature, windVelocity, value);
+        }
+
+        public override void Calculate()
+        {
+            value = 35.74 + 0.6215 * temperature - 35.75 * Math.Pow(windVelocity, 0.16) 
+                    + 0.4275 * temperature * Math.Pow(windVelocity, 0.16);
+        }
+        
         public static double Calculate(double F, double W)
         {
             double WCT = 35.74 + 0.6215 * F - 35.75 * Math.Pow(W, 0.16) + 0.4275 * F * Math.Pow(W, 0.16);
@@ -293,19 +367,29 @@ namespace ConsoleApp1
                 Console.WriteLine("");
             }
         }
+
+        // 사용자로부터 입력 받기
+        public override void GetUserInput()
+        {
+            string input;
+
+            Console.WriteLine("Please enter temperature (F) >>");
+            input = Console.Read().ToString();
+            Double.TryParse(input, out temperature);
+
+            Console.WriteLine("Please enter wind velocity (mph) >>");
+            input = Console.Read().ToString();
+            Double.TryParse(input, out windVelocity);
+
+            Calculate();
+        }
     }
 
     class CalculatorApp
     {
         static void Main(string[] args)
         {
-            DewPointCalculator d = new DewPointCalculator();
-            d.BuildTable();
-            d.PrintTable();
-            
-            WindChillTemperatureCalculator w = new WindChillTemperatureCalculator();
-            w.BuildTable();
-            w.PrintTable();
+            Calculator myCalc = new Calculator();
         }
     }
 }
