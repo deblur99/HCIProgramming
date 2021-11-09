@@ -10,6 +10,11 @@ namespace ConsoleApp1
 
         protected double value; // DewPoint 값
 
+        public virtual void BuildTable()
+        {
+            return;
+        }
+
         public double Temperature
         {
             get { return temperature; }
@@ -68,9 +73,73 @@ namespace ConsoleApp1
 
     class DewPointCalculator : Calculator
     {
-        // 테이블
-        // 존재하지 않는 값은 -1로 처리
-        private readonly string[,] _dewPointTable = new string[,]
+        // 테이블 배열 생성
+        private string[,] _dewPointTable = new string[18,20];
+        
+        // row
+        private double[] _FList =
+        {
+            110, 105, 100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 32
+        };
+        
+        // column
+        private double[] _RHList =
+        {
+            100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10
+        };
+
+        public override void BuildTable()
+        {
+            // debug
+            Console.WriteLine("row: {0}, col: {1}", _FList.Length, _RHList);
+            _dewPointTable[0, 0] = "F/RH";
+
+            for (int i = 0; i < _FList.Length; i++)
+            {
+                for (int j = 0; j < _RHList.Length; j++)
+                {
+                    // F/RH 문자열이 들어간 인덱스 생략
+                    if (i == 0 && j == 0)
+                    {
+                        continue;
+                    }
+                    
+                    // 0번째 row는 RH 기준값을 의미한다.
+                    // 해당 row의 모든 column에 _RHList 배열의 요소를 저장한다.
+                    if (i == 0)
+                    {
+                        _dewPointTable[i, j] = _RHList[j].ToString();
+                        continue;
+                    }
+                    
+                    // 0번째 col은 F 기준값을 의미한다.
+                    // 해당 column의 모든 row에 _FList 배열의 요소를 저장한다.
+                    if (j == 0)
+                    {
+                        _dewPointTable[i, j] = _FList[i].ToString();
+                        continue;
+                    }
+
+                    // 그 외 인덱스에는 계산하는 함수의 반환값을 입력한다.
+                    _dewPointTable[i + 1, j + 1] = CalculateDewPoint(_FList[i], _RHList[j]).ToString();
+                }
+            }
+        }
+        
+        public override void PrintTable()
+        {
+            Console.Write(_dewPointTable[0,2]);
+            // for (int i = 0; i < _dewPointTable.GetLength(0); i++)
+            // {
+            //     for (int j = 0; j < _dewPointTable.GetLength(1); j++)
+            //     {
+            //         Console.Write("{0}\t", _dewPointTable[i, j]);
+            //     }
+            //     Console.WriteLine("");
+            // }
+        }
+        
+        /*
         {
             {
                 "F/RH", "100", "95", "90", "85", "80", "75", "70", "65", "60", "55", "50", "45", "40", "35", "30", "25",
@@ -144,11 +213,12 @@ namespace ConsoleApp1
                 "32", "32", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
                 "-1", "-1", "-1"
             }
-        };
+        };*/
 
         public DewPointCalculator()
         {
             Console.WriteLine("Calculate DewPoint");
+            //GetUserInput();
         }
 
         public override void Calculate()
@@ -176,21 +246,6 @@ namespace ConsoleApp1
         {
             return String.Format("DewPointCalculator [Temperature={0}, RelativeHumidity={1}, Value={2}]",
                 temperature, relativeHumidity, value);
-        }
-
-        public override void PrintTable()
-        {
-            for (int i = 0; i < _dewPointTable.GetLength(0); i++)
-            {
-                for (int j = 0; j < _dewPointTable.GetLength(1); j++)
-                {
-                    if (!String.Equals(_dewPointTable[i, j], "-1"))
-                        Console.Write("{0}\t", _dewPointTable[i, j]);
-                    else
-                        break;
-                }
-                Console.WriteLine("");
-            }
         }
     }
 
@@ -277,10 +332,11 @@ namespace ConsoleApp1
         static void Main(string[] args)
         {
             DewPointCalculator d = new DewPointCalculator();
+            d.BuildTable();
             d.PrintTable();
-
-            WindChillTemperatureCalculator w = new WindChillTemperatureCalculator();
-            w.PrintTable();
+            // WindChillTemperatureCalculator w = new WindChillTemperatureCalculator();
+            // w.GetUserInput();
+            // w.PrintTable();
         }
     }
 }
