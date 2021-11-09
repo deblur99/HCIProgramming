@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Runtime.CompilerServices;
+using ConsoleApp1;
 
 namespace ConsoleApp1
 {
@@ -69,54 +71,98 @@ namespace ConsoleApp1
         {
             return;
         }
+
+        // 사용자에게 계속 계산할지 여부를 묻는 메서드 
+        // 0, 1, 2 중 하나를 반환한다.
+        // 0 : 프로그램 종료
+        // 1 : DP 계산기 실행
+        // 2 : WCT 계산기 실행
+        public int GetDecisionToContinue()
+        {
+            string decision;
+
+            Console.Write("Press q-key to exit or enter-key to continue >>");
+            decision = Console.Read().ToString();
+
+            if (decision.Equals("q") || decision.Equals("Q"))
+            {
+                return 0;
+            }
+
+            for (;;)
+            {
+                decision = "";
+
+                Console.Write("Please enter mode [1: DP, 2: WCT] >>");
+                decision = Console.Read().ToString();
+
+                if (decision.Equals("DP"))
+                {
+                    return 1;
+                }
+                else if (decision.Equals("WCT"))
+                {
+                    return 2;
+                }
+                else
+                {
+                    Console.WriteLine("Invalid Input");
+                }
+            }
+        }
     }
 
     class DewPointCalculator : Calculator
     {
         // 테이블 배열 생성
-        private string[,] _dewPointTable = new string[18,20];
-        
+        private string[,] _dewPointTable = new string[18, 20];
+
         // row
-        private double[] _FList =
+        private static double[] _FList =
         {
             110, 105, 100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 32
         };
-        
+
         // column
-        private double[] _RHList =
+        private static double[] _RHList =
         {
             100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10
         };
 
+        // 몇 번째 column 인덱스부터 NaN이 존재하는지 지정하는 배열
+        private static int[] filter =
+        {
+            _RHList.Length, _RHList.Length, _RHList.Length, _RHList.Length - 1, _RHList.Length - 1, _RHList.Length - 1,
+            _RHList.Length - 2, _RHList.Length - 3, _RHList.Length - 3, _RHList.Length - 4, _RHList.Length - 5,
+            _RHList.Length - 7, _RHList.Length - 8, _RHList.Length - 11, _RHList.Length - 13, _RHList.Length - 16,
+            _RHList.Length - 18
+        };
+
         public override void BuildTable()
         {
-            // debug
-            Console.WriteLine("row: {0}, col: {1}", _FList.Length, _RHList);
             _dewPointTable[0, 0] = "F/RH";
 
+            // 0번째 row에 RH 기준값 채우기
+            for (int i = 0; i < _RHList.Length; i++)
+            {
+                _dewPointTable[0, i + 1] = _RHList[i].ToString();
+            }
+
+            // 0번째 col에 F 기준값 채우기
+            for (int i = 0; i < _FList.Length; i++)
+            {
+                _dewPointTable[i + 1, 0] = _FList[i].ToString();
+            }
+
+            // 1번째 row, 1번째 col부터 DewPoint 값 채우기
             for (int i = 0; i < _FList.Length; i++)
             {
                 for (int j = 0; j < _RHList.Length; j++)
                 {
-                    // F/RH 문자열이 들어간 인덱스 생략
-                    if (i == 0 && j == 0)
+                    // column 인덱스가 filter 배열의 값에 도달하면 그 뒤 값은 -1로 채움
+                    if (j >= filter[i])
                     {
-                        continue;
-                    }
-                    
-                    // 0번째 row는 RH 기준값을 의미한다.
-                    // 해당 row의 모든 column에 _RHList 배열의 요소를 저장한다.
-                    if (i == 0)
-                    {
-                        _dewPointTable[i, j] = _RHList[j].ToString();
-                        continue;
-                    }
-                    
-                    // 0번째 col은 F 기준값을 의미한다.
-                    // 해당 column의 모든 row에 _FList 배열의 요소를 저장한다.
-                    if (j == 0)
-                    {
-                        _dewPointTable[i, j] = _FList[i].ToString();
+                        _dewPointTable[i + 1, j + 1] = "-1";
                         continue;
                     }
 
@@ -125,100 +171,30 @@ namespace ConsoleApp1
                 }
             }
         }
-        
+
+        // 테이블의 요소를 출력하는 메서드
         public override void PrintTable()
         {
-            Console.Write(_dewPointTable[0,2]);
-            // for (int i = 0; i < _dewPointTable.GetLength(0); i++)
-            // {
-            //     for (int j = 0; j < _dewPointTable.GetLength(1); j++)
-            //     {
-            //         Console.Write("{0}\t", _dewPointTable[i, j]);
-            //     }
-            //     Console.WriteLine("");
-            // }
-        }
-        
-        /*
-        {
+            for (int i = 0; i < _dewPointTable.GetLength(0); i++)
             {
-                "F/RH", "100", "95", "90", "85", "80", "75", "70", "65", "60", "55", "50", "45", "40", "35", "30", "25",
-                "20", "15", "10"
-            },
-            {
-                "110", "110", "108", "106", "104", "102", "100", "98", "95", "93", "90", "87", "84", "80", "76", "72",
-                "65", "60", "51", "41"
-            },
-            {
-                "105", "105", "103", "101", "99", "97", "95", "93", "91", "88", "85", "83", "80", "76", "72", "67",
-                "62", "55", "47", "37"
-            },
-            {
-                "100", "100", "99", "97", "95", "93", "91", "89", "86", "84", "81", "78", "72", "71", "67", "63", "58",
-                "52", "44", "32"
-            },
-            {
-                "95", "95", "93", "92", "90", "88", "86", "84", "81", "79", "76", "73", "70", "67", "63", "59", "54",
-                "48", "40", "32"
-            },
-            {
-                "90", "90", "88", "87", "85", "83", "81", "79", "76", "74", "71", "68", "65", "62", "59", "54", "49",
-                "43", "36", "32"
-            },
-            {
-                "85", "85", "83", "81", "80", "78", "76", "74", "72", "69", "67", "64", "61", "58", "54", "50", "45",
-                "38", "32", "-1"
-            },
-            {
-                "80", "80", "78", "77", "75", "73", "71", "69", "67", "65", "62", "59", "56", "53", "50", "45", "40",
-                "35", "32", "-1"
-            },
-            {
-                "75", "75", "73", "72", "70", "68", "66", "64", "62", "60", "58", "55", "52", "49", "45", "41", "36",
-                "32", "-1", "-1"
-            },
-            {
-                "70", "70", "68", "67", "65", "63", "61", "59", "57", "55", "53", "50", "47", "44", "40", "37", "32",
-                "-1", "-1", "-1"
-            },
-            {
-                "65", "65", "63", "62", "60", "59", "57", "55", "53", "50", "48", "45", "42", "40", "36", "32", "-1",
-                "-1", "-1", "-1"
-            },
-            {
-                "60", "60", "58", "57", "55", "53", "52", "50", "48", "45", "43", "41", "38", "35", "32", "-1", "-1",
-                "-1", "-1", "-1"
-            },
-            {
-                "55", "55", "53", "52", "50", "49", "47", "45", "43", "40", "38", "36", "33", "32", "-1", "-1", "-1",
-                "-1", "-1", "-1"
-            },
-            {
-                "50", "50", "48", "46", "45", "44", "42", "40", "38", "36", "34", "32", "-1", "-1", "-1", "-1", "-1",
-                "-1", "-1", "-1"
-            },
-            {
-                "45", "45", "43", "42", "40", "39", "37", "35", "33", "32", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
-                "-1", "-1", "-1"
-            },
-            {
-                "40", "40", "39", "37", "35", "34", "32", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
-                "-1", "-1", "-1"
-            },
-            {
-                "35", "35", "34", "32", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
-                "-1", "-1", "-1"
-            },
-            {
-                "32", "32", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1", "-1",
-                "-1", "-1", "-1"
+                for (int j = 0; j < _dewPointTable.GetLength(1); j++)
+                {
+                    // 테이블의 요소가 -1인 지점을 발견하기 전까지 출력하며, 각 요소는 tab 문자로 구분된다.
+                    if (!_dewPointTable[i, j].Equals("-1"))
+                        Console.Write("{0}\t", _dewPointTable[i, j]);
+
+                    // 요소가 -1인 지점을 발견하면 다음 row로 넘긴다.
+                    else
+                        j = _dewPointTable.GetLength(1);
+                }
+
+                Console.WriteLine("");
             }
-        };*/
+        }
 
         public DewPointCalculator()
         {
             Console.WriteLine("Calculate DewPoint");
-            //GetUserInput();
         }
 
         public override void Calculate()
@@ -251,69 +227,59 @@ namespace ConsoleApp1
 
     class WindChillTemperatureCalculator : Calculator
     {
-        private readonly string[,] _windChillTemperatureTable = new string[,]
+        private string[,] _windChillTemperatureTable = new string[13,19];
+        
+        // row
+        private static double[] _WList =
         {
-            {
-                "W/F", "40", "35", "30", "25", "20", "15", "10", "5", "0", "-5", "-10", "-15", "-20", "-25", "-30",
-                "-35", "-40", "-45"
-            },
-            {
-                "5", "36", "31", "25", "19", "13", "7", "1", "-5", "-11", "-16", "-22", "-28", "-34", "-40", "-46",
-                "-52",
-                "-57", "-63"
-            },
-            {
-                "10", "34", "27", "21", "15", "9", "3", "-4", "-10", "-16", "-22", "-28", "-35", "-41", "-47", "-53",
-                "-59", "-66", "-72"
-            },
-            {
-                "15", "32", "25", "19", "13", "6", "0", "-7", "-13", "19", "-26", "-32", "-39", "-45", "-51", "-58",
-                "-64",
-                "-71", "-77"
-            },
-            {
-                "20", "30", "24", "17", "11", "4", "-2", "-9", "-15", "-22", "-29", "-35", "-42", "-48", "-55", "-61",
-                "-68", "-74", "-81"
-            },
-            {
-                "25", "29", "23", "16", "9", "3", "-4", "-11", "-17", "-24", "-31", "-37", "-44", "-51", "-58", "-64",
-                "-71", "-78", "-84"
-            },
-            {
-                "30", "28", "22", "15", "8", "1", "-5", "-12", "-19", "-26", "-33", "-39", "-46", "-53", "-60", "-67",
-                "-73", "-80", "-87"
-            },
-            {
-                "35", "28", "21", "14", "7", "0", "-7", "-14", "-21", "-27", "-34", "-41", "-48", "-55", "-62", "-69",
-                "-76", "-82", "-89"
-            },
-            {
-                "40", "27", "20", "13", "6", "-1", "-8", "-15", "-22", "-29", "-36", "-43", "-50", "-57", "-64", "-71",
-                "-78", "-84", "-91"
-            },
-            {
-                "45", "26", "19", "12", "5", "-2", "-9", "-16", "-23", "-30", "-37", "-44", "-51", "-58", "-65", "-72",
-                "-79", "-86", "-93"
-            },
-            {
-                "50", "26", "19", "12", "4", "-3", "-10", "-17", "-24", "-31", "-38", "-45", "-52", "-60", "-67", "-74",
-                "-81", "-88", "-95"
-            },
-            {
-                "55", "25", "18", "11", "4", "-3", "-11", "-18", "-25", "-32", "-39", "-46", "-54", "-61", "-68", "-75",
-                "-82", "-89", "-97"
-            },
-            {
-                "60", "25", "17", "10", "3", "-4", "-11", "-19", "-26", "-33", "-40", "-48", "-55", "-62", "-69", "-76",
-                "-84", "-91", "-98"
-            }
+            5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60
+        };
+        
+        // column
+        private static double[] _FList =
+        {
+            40, 35, 30, 25, 20, 15, 10, 5, 0, -5, -10, -15, -20, -25, -30, -35, -40, -45
         };
 
+        public override void BuildTable()
+        {
+            // 0, 0 인덱스
+            _windChillTemperatureTable[0, 0] = "W/F";
+            
+            // 0번째 row
+            for (int i = 0; i < _FList.Length; i++)
+            {
+                _windChillTemperatureTable[0, i + 1] = _WList[i].ToString();
+            }
+
+            // 0번째 column
+            for (int i = 0; i < _WList.Length; i++)
+            {
+                _windChillTemperatureTable[i + 1, 0] = _FList[i].ToString();
+            }
+            
+            // others
+            for (int i = 0; i < _WList.Length; i++)
+            {
+                for (int j = 0; j < _FList.Length; j++)
+                {
+                    _windChillTemperatureTable[i + 1, j + 1] = Calculate(_WList[i], _FList[j]).ToString();
+                }
+            }
+        }
+        
         public WindChillTemperatureCalculator()
         {
             Console.WriteLine("Calculate WindChillTemperatureCalculator");
         }
-        
+
+        public static double Calculate(double F, double V)
+        {
+            double WCT = 35.74 + 0.6215 * F - 35.75 * Math.Pow(V, 0.16) + 0.4275 * F * Math.Pow(V, 0.16);
+
+            return WCT;
+        }
+
         public override void PrintTable()
         {
             for (int i = 0; i < _windChillTemperatureTable.GetLength(0); i++)
@@ -322,6 +288,7 @@ namespace ConsoleApp1
                 {
                     Console.Write("{0}\t", _windChillTemperatureTable[i, j]);
                 }
+
                 Console.WriteLine("");
             }
         }
@@ -334,9 +301,10 @@ namespace ConsoleApp1
             DewPointCalculator d = new DewPointCalculator();
             d.BuildTable();
             d.PrintTable();
-            // WindChillTemperatureCalculator w = new WindChillTemperatureCalculator();
-            // w.GetUserInput();
-            // w.PrintTable();
+            
+            WindChillTemperatureCalculator w = new WindChillTemperatureCalculator();
+            w.BuildTable();
+            w.PrintTable();
         }
     }
 }
