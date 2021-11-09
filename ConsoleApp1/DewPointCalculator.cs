@@ -249,13 +249,13 @@ namespace ConsoleApp1
             // 0번째 row
             for (int i = 0; i < _FList.Length; i++)
             {
-                _windChillTemperatureTable[0, i + 1] = _WList[i].ToString();
+                _windChillTemperatureTable[0, i + 1] = _FList[i].ToString();
             }
 
             // 0번째 column
             for (int i = 0; i < _WList.Length; i++)
             {
-                _windChillTemperatureTable[i + 1, 0] = _FList[i].ToString();
+                _windChillTemperatureTable[i + 1, 0] = _WList[i].ToString();
             }
             
             // others
@@ -263,7 +263,8 @@ namespace ConsoleApp1
             {
                 for (int j = 0; j < _FList.Length; j++)
                 {
-                    _windChillTemperatureTable[i + 1, j + 1] = Calculate(_WList[i], _FList[j]).ToString();
+                    // 결과값 계산 후 테이블에 입력
+                    _windChillTemperatureTable[i + 1, j + 1] = Calculate(_FList[j], _WList[i]).ToString();
                 }
             }
         }
@@ -273,11 +274,11 @@ namespace ConsoleApp1
             Console.WriteLine("Calculate WindChillTemperatureCalculator");
         }
 
-        public static double Calculate(double F, double V)
+        public static double Calculate(double F, double W)
         {
-            double WCT = 35.74 + 0.6215 * F - 35.75 * Math.Pow(V, 0.16) + 0.4275 * F * Math.Pow(V, 0.16);
+            double WCT = 35.74 + 0.6215 * F - 35.75 * Math.Pow(W, 0.16) + 0.4275 * F * Math.Pow(W, 0.16);
 
-            return WCT;
+            return Math.Round(WCT, 1);
         }
 
         public override void PrintTable()
