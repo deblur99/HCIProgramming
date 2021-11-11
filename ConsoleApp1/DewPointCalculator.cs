@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections;
-using System.Collections.Specialized;
-using System.Security.Cryptography;
-using System.Threading;
-using Microsoft.VisualBasic.FileIO;
 
 namespace ConsoleApp1
 {
