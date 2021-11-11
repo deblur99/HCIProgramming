@@ -130,7 +130,7 @@ namespace ConsoleApp1
                     }
 
                     // 그 외 인덱스에는 계산하는 함수의 반환값을 입력한다.
-                    _dewPointTable[i + 1, j + 1] = CalculateDewPoint(_FList[i], _RHList[j]).ToString();
+                    _dewPointTable[i + 1, j + 1] = Calculate(_FList[i], _RHList[j]).ToString();
                 }
             }
         }
@@ -168,7 +168,7 @@ namespace ConsoleApp1
         }
 
         // double 매개변수 2개를 갖는 메서드 선언 및 정의
-        public static double CalculateDewPoint(double F, double RH)
+        public static double Calculate(double F, double RH)
         {
             // 화씨 온도와 섭씨 온도 간 변환
             double CelsiusToFahrenheit(double c)
