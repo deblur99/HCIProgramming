@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Specialized;
+using System.Security.Cryptography;
+using System.Threading;
 using Microsoft.VisualBasic.FileIO;
 
 namespace ConsoleApp1
@@ -10,17 +12,6 @@ namespace ConsoleApp1
         protected double temperature; // fahrenheit
 
         protected double value; // 환산 결과값
-
-        protected virtual void Init()
-        {
-            temperature = 0.0f;
-            value = 0.0f;
-        }
-
-        public virtual void BuildTable()
-        {
-            return;
-        }
 
         public double Temperature
         {
@@ -32,6 +23,17 @@ namespace ConsoleApp1
         {
             get { return value; }
             set { this.value = value; }
+        }
+
+        protected virtual void Init()
+        {
+            temperature = 0.0f;
+            value = 0.0f;
+        }
+
+        public virtual void BuildTable()
+        {
+            return;
         }
 
         public virtual void Calculate()
@@ -65,6 +67,9 @@ namespace ConsoleApp1
 
     class DewPointCalculator : Calculator
     {
+        // 테이블 배열 생성
+        private string[,] _dewPointTable = new string[18, 20];
+
         private double relativeHumidity; // %
 
         public double RelativeHumidity
@@ -77,35 +82,32 @@ namespace ConsoleApp1
         {
             base.Init();
             relativeHumidity = 0.0f;
-            Console.WriteLine("f={0} rh={1}", temperature, relativeHumidity);
         }
-
-        // 테이블 배열 생성
-        private string[,] _dewPointTable = new string[18, 20];
-
-        // row
-        private static double[] _FList =
-        {
-            110, 105, 100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 32
-        };
-
-        // column
-        private static double[] _RHList =
-        {
-            100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10
-        };
-
-        // 몇 번째 column 인덱스부터 NaN이 존재하는지 지정하는 배열
-        private static int[] filter =
-        {
-            _RHList.Length, _RHList.Length, _RHList.Length, _RHList.Length - 1, _RHList.Length - 1, _RHList.Length - 1,
-            _RHList.Length - 2, _RHList.Length - 3, _RHList.Length - 3, _RHList.Length - 4, _RHList.Length - 5,
-            _RHList.Length - 7, _RHList.Length - 8, _RHList.Length - 11, _RHList.Length - 13, _RHList.Length - 16,
-            _RHList.Length - 18
-        };
 
         public override void BuildTable()
         {
+            // row
+            double[] _FList =
+            {
+                110, 105, 100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 32
+            };
+
+            // column
+            double[] _RHList =
+            {
+                100, 95, 90, 85, 80, 75, 70, 65, 60, 55, 50, 45, 40, 35, 30, 25, 20, 15, 10
+            };
+
+            // 몇 번째 column 인덱스부터 NaN이 존재하는지 지정하는 배열
+            int[] filter =
+            {
+                _RHList.Length, _RHList.Length, _RHList.Length, _RHList.Length - 1, _RHList.Length - 1,
+                _RHList.Length - 1,
+                _RHList.Length - 2, _RHList.Length - 3, _RHList.Length - 3, _RHList.Length - 4, _RHList.Length - 5,
+                _RHList.Length - 7, _RHList.Length - 8, _RHList.Length - 11, _RHList.Length - 13, _RHList.Length - 16,
+                _RHList.Length - 18
+            };
+
             _dewPointTable[0, 0] = "F/RH";
 
             // 0번째 row에 RH 기준값 채우기
@@ -141,9 +143,11 @@ namespace ConsoleApp1
         // 테이블의 요소를 출력하는 메서드
         public override void PrintTable()
         {
-            for (int i = 0; i < _dewPointTable.GetLength(0); i++)
+            int i = 0, j = 0;
+            
+            while (i < _dewPointTable.GetLength(0))
             {
-                for (int j = 0; j < _dewPointTable.GetLength(1); j++)
+                while (j < _dewPointTable.GetLength(1))
                 {
                     // 테이블의 요소가 -1인 지점을 발견하기 전까지 출력하며, 각 요소는 tab 문자로 구분된다.
                     if (!_dewPointTable[i, j].Equals("-1"))
@@ -152,9 +156,13 @@ namespace ConsoleApp1
                     // 요소가 -1인 지점을 발견하면 다음 row로 넘긴다.
                     else
                         j = _dewPointTable.GetLength(1);
+
+                    j++;
                 }
 
                 Console.WriteLine("");
+                i++;
+                j = 0;
             }
         }
 
@@ -167,6 +175,17 @@ namespace ConsoleApp1
         // double 매개변수 2개를 갖는 메서드 선언 및 정의
         public static double CalculateDewPoint(double F, double RH)
         {
+            // 화씨 온도와 섭씨 온도 간 변환
+            double CelsiusToFahrenheit(double c)
+            {
+                return 1.8f * c + 32;
+            }
+
+            double FahrenheitToCelsius(double f)
+            {
+                return (f - 32) * 5 / 9;
+            }
+
             double C = FahrenheitToCelsius(F);
             double dewPoint;
 
@@ -176,16 +195,6 @@ namespace ConsoleApp1
 
             // 소수 둘째 자리에서 반올림하여 실수 값을 소수점 하나만 남기는 Math 라이브러리의 Round 함수 호출
             return Math.Round(CelsiusToFahrenheit(dewPoint), 1);
-        }
-
-        public static double CelsiusToFahrenheit(double c)
-        {
-            return 1.8f * c + 32;
-        }
-
-        public static double FahrenheitToCelsius(double f)
-        {
-            return (f - 32) * 5 / 9;
         }
 
         public override void ShowCalcResult()
@@ -202,18 +211,18 @@ namespace ConsoleApp1
 
         public override void GetUserInput()
         {
-            string input;
+            string input = "";
 
             Init();
 
             Console.WriteLine("Calculate DewPoint");
 
             Console.Write("Please enter temperature (F) >>");
-            input = Console.Read().ToString();
+            input = Console.ReadLine();
             Double.TryParse(input, out temperature);
 
             Console.Write("Please enter relative humidity (%) >>");
-            input = Console.Read().ToString();
+            input = Console.ReadLine();
             Double.TryParse(input, out relativeHumidity);
         }
     }
@@ -222,30 +231,35 @@ namespace ConsoleApp1
     {
         private double windVelocity; // mph
 
-        protected override void Init()
+        public double WindVelocity
         {
-            base.Init();
-            windVelocity = 0.0f;
-            Console.WriteLine("t={0} v={1}", temperature, windVelocity);
+            get { return windVelocity; }
+            set { windVelocity = value; }
         }
 
         private string[,] _windChillTemperatureTable = new string[13, 19];
 
-        // row
-        private static double[] _WList =
+        protected override void Init()
         {
-            5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60
-        };
-
-        // column
-        private static double[] _FList =
-        {
-            40, 35, 30, 25, 20, 15, 10, 5, 0, -5, -10, -15, -20, -25, -30, -35, -40, -45
-        };
+            base.Init();
+            windVelocity = 0.0f;
+        }
 
         // 체감 온도 테이블 생성
         public override void BuildTable()
         {
+            // row
+            double[] _WList =
+            {
+                5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60
+            };
+
+            // column
+            double[] _FList =
+            {
+                40, 35, 30, 25, 20, 15, 10, 5, 0, -5, -10, -15, -20, -25, -30, -35, -40, -45
+            };
+
             // 0, 0 인덱스
             _windChillTemperatureTable[0, 0] = "W/F";
 
@@ -271,13 +285,7 @@ namespace ConsoleApp1
                 }
             }
         }
-
-        public double WindVelocity
-        {
-            get { return windVelocity; }
-            set { windVelocity = value; }
-        }
-
+        
         public override void ShowCalcResult()
         {
             Console.WriteLine(ToString());
@@ -307,14 +315,19 @@ namespace ConsoleApp1
         // 체감 온도 테이블 출력하기
         public override void PrintTable()
         {
-            for (int i = 0; i < _windChillTemperatureTable.GetLength(0); i++)
+            int i = 0, j = 0;
+
+            while (i < _windChillTemperatureTable.GetLength(0))
             {
-                for (int j = 0; j < _windChillTemperatureTable.GetLength(1); j++)
+                while (j < _windChillTemperatureTable.GetLength(1))
                 {
                     Console.Write("{0}\t", _windChillTemperatureTable[i, j]);
+                    j++;
                 }
 
                 Console.WriteLine("");
+                i++;
+                j = 0;
             }
         }
 
@@ -328,11 +341,11 @@ namespace ConsoleApp1
             Console.WriteLine("Calculate WindChillTemperature");
 
             Console.Write("Please enter temperature (F) >>");
-            input = Console.Read().ToString();
+            input = Console.ReadLine();
             Double.TryParse(input, out temperature);
 
             Console.Write("Please enter wind velocity (mph) >>");
-            input = Console.Read().ToString();
+            input = Console.ReadLine();
             Double.TryParse(input, out windVelocity);
         }
     }
@@ -344,43 +357,43 @@ namespace ConsoleApp1
             do
             {
                 string decision = "";
-                DewPointCalculator dewCalc = new DewPointCalculator();
-                WindChillTemperatureCalculator windCalc = new WindChillTemperatureCalculator();
+                Calculator calc = new Calculator();
 
                 // 작업 선택
                 do
                 {
                     Console.Write("Please enter mode [1: DP, 2: WCT] >>");
-                    decision = Console.Read().ToString();
-                } while (decision.Equals("1") || decision.Equals("2"));
+                    decision = Console.ReadLine();
+                } while (!decision.Equals("1") && !decision.Equals("2"));
 
                 // 주요 함수 호출
-                switch (decision[0])
+                switch (decision)
                 {
-                    case '1':
-                        dewCalc.BuildTable();
-                        dewCalc.PrintTable(); // 테이블 출력
-                        dewCalc.GetUserInput(); // 사용자로부터 값 입력 
-                        dewCalc.Calculate(); // 계산
-                        dewCalc.ShowCalcResult(); // 계산 결과 출력
+                    // 입력 값에 대응하는 자식 클래스 객체로 형 변환
+                    case "1":
+                        calc = new DewPointCalculator();
                         break;
-                    case '2':
-                        windCalc.BuildTable();
-                        windCalc.PrintTable(); // 테이블 출력
-                        windCalc.GetUserInput(); // 사용자로부터 값 입력
-                        windCalc.Calculate(); // 계산
-                        windCalc.ShowCalcResult(); // 계산 결과 출력
+                    case "2":
+                        calc = new WindChillTemperatureCalculator();
                         break;
                 }
-                
+
+                // 주요 함수 호출
+                calc.BuildTable();
+                calc.PrintTable(); // 테이블 출력
+                calc.GetUserInput(); // 사용자로부터 값 입력
+                calc.Calculate(); // 계산
+                calc.ShowCalcResult(); // 계산 결과 출력
+
                 // 종료 여부
                 Console.Write("Press q-key to exit or enter-key to continue >>");
-                decision = Console.Read().ToString();
+                decision = Console.ReadLine();
 
+                // 입력 값이 q나 Q일 경우 프로그램 종료
                 if (decision.Equals("q") || decision.Equals("Q"))
                 {
                     Console.WriteLine("done..");
-                    return; // 프로그램 종료
+                    return;
                 }
             } while (true); // q 또는 Q를 입력할 때까지 반복
         }
