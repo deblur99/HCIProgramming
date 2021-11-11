@@ -52,12 +52,6 @@ namespace ConsoleApp1
         {
             return;
         }
-
-        // 사용자에게 계속 계산할지 여부를 묻는 메서드 
-        // 0, 1, 2 중 하나를 반환한다.
-        // 0 : 프로그램 종료
-        // 1 : DP 계산기 실행
-        // 2 : WCT 계산기 실행
     }
 
     class DewPointCalculator : Calculator
