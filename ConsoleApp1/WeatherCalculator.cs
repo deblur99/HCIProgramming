@@ -1,4 +1,5 @@
-﻿using System;
+﻿/*
+using System;
 
 namespace ConsoleApp1
 {
@@ -363,7 +364,6 @@ namespace ConsoleApp1
             throw new NotImplementedException();
         }
     }
-
     class CalculatorApp
     {
         public static void Main(string[] args)
@@ -373,3 +373,4 @@ namespace ConsoleApp1
         }
     }
 }
+*/ 
