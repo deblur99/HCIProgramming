@@ -1,17 +1,20 @@
-﻿/*
+/*
 using System;
 
 namespace ConsoleApp1
+=======
+﻿namespace ConsoleApp1
+>>>>>>> f2028af6873bd15c56df249f1e08a289f3ffd147
 {
     public abstract class WeatherCalculator
     {
         protected double Temperature; // fahrenheit
-        
+
         public WeatherCalculator()
         {
             Temperature = 0.0f;
         }
-        
+
         protected double Value // 자식클래스에서 공통으로 사용
         {
             get;
@@ -33,6 +36,7 @@ namespace ConsoleApp1
 
         protected abstract void Calculate();
     }
+<<<<<<< HEAD
 
     class DewPointCalculator : WeatherCalculator
     {
@@ -373,4 +377,4 @@ namespace ConsoleApp1
         }
     }
 }
-*/ 
+*/
