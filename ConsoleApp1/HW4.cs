@@ -5,7 +5,7 @@ namespace ConsoleApp1
     public class HW4
     {
         interface IWeatherCalculator
-        {
+        {   
             
         }
         
