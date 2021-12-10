@@ -4,50 +4,9 @@ namespace ConsoleApp1
 {
     public class HW4
     {
-        interface IWeatherCalculator
-        {   
-            
-        }
         
-        private class WeatherData: IEquatable<IWeatherCalculator>
         {
-            DateTime DateTime { get; set; }
-            double Temperature { get; set; } // fahrenheit
-            double RelativeHumidity { get; set; } // %
-            double WindVelocity { get; set; }
-            double Value { get; set; } // 계산값
-
-            WeatherData()
-            {
-                
-            }
-
-            public override string ToString()
-            {
-                
-            }
-
-            public static bool operator ==(WeatherData x, WeatherData y)
-            {
-                return x?.Value - y?.Value <= Double.Epsilon;
-            }
-
-            public static bool operator !=(WeatherData x, WeatherData y)
-            {
-                
-            }
-             
-            public override int GetHashCode()
             
-            public bool Equals(WeatherData other)
-            {
-                
-            }
-
-            public bool Equals(IWeatherCalculator? other)
-            {
-                throw new NotImplementedException();
-            }
         }
         
         public abstract class WeatherCalculator
