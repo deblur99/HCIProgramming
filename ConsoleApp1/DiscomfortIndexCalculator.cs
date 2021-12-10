@@ -41,7 +41,7 @@ namespace ConsoleApp1
         {
             string input = "";
 
-            Console.WriteLine("Calculate DewPoint");
+            Console.WriteLine("Calculate DiscomfortIndexCalculator");
 
             Console.Write("Please enter temperature (F) >>");
             WeatherData.Temperature = Double.Parse(Console.ReadLine());
@@ -68,8 +68,8 @@ namespace ConsoleApp1
         public override string ToString()
         {
             return String.Format(
-                "DiscomfortIndexCalculator [Temperature = {0}, RelativeHumidity = {1}, Value = {2}, Index = {3}}",
-                WeatherData.Temperature, WeatherData.RelativeHumidity, WeatherData.Value, GetIndex(Value));
+                "DiscomfortIndexCalculator [Temperature={0}, RelativeHumidity={1}, Value={2}, Index={3}]",
+                WeatherData.Temperature, WeatherData.RelativeHumidity, Value, GetIndex(Value));
         }
 
         public static DiscomfortIndex? GetIndex(double value)

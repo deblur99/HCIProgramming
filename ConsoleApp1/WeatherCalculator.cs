@@ -15,7 +15,7 @@ namespace ConsoleApp1
         protected WeatherCalculator(WeatherData weatherData)
         {
             WeatherData = weatherData;
-            Calculate(); // 동적바인딩으로 자식클래스의 calculate() 호출
+            Process();
             Console.WriteLine(this);
         }
 

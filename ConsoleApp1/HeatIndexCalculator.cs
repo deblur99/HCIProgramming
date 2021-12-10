@@ -18,7 +18,7 @@ namespace ConsoleApp1
 
         public override void PrintTable()
         {
-            Console.WriteLine("Print WindChillTemperature");
+            Console.WriteLine("Print HeatIndex");
             int[] fahrenheit = {80, 82, 84, 86, 88, 90, 92, 94, 96, 98, 100, 102, 104, 106, 108, 110};
             int[] humidities = {40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100};
             Console.WriteLine("RH/F\t80\t82\t84\t86\t88\t90\t92\t94\t96\t98\t100\t102\t104\t106\t108\t110");
@@ -58,15 +58,9 @@ namespace ConsoleApp1
 
         public double Calculate(double temperature, double humidity)
         {
-            double t_temperature = FahrenheitToCelsius(temperature);
-
-            double result = CelsiusToFahrenheit(-42.379 + (2.04901523 * t_temperature) + (10.14333127 * humidity) -
-                                                (0.22475541 * t_temperature * humidity) -
-                                                (0.00683770 * t_temperature * t_temperature) -
-                                                (0.05481717 * humidity * humidity) +
-                                                (0.00122874 * t_temperature * t_temperature * humidity) +
-                                                (0.00085282 * t_temperature * humidity * humidity) -
-                                                (0.00000199 * t_temperature * t_temperature * humidity * humidity));
+            double result = -42.379 + (2.04901523 * temperature) + (10.14333127 * humidity) -
+                (0.22475541 * temperature * humidity) - (0.00683770 * temperature * temperature) - (0.05481717 * humidity * humidity) + (0.00122874 * temperature * temperature * humidity) +
+                (0.00085282 * temperature * humidity * humidity) - (0.00000199 * temperature * temperature * humidity * humidity);
 
             return Math.Round(result * 10) / 10.0;
         }
@@ -75,7 +69,7 @@ namespace ConsoleApp1
         {
             return String.Format(
                 "HeatIndexCalculator [Temperature={0}, WindVelocity={1}, Value={2:0.#}, Index={3}]",
-                WeatherData.Temperature, WeatherData.RelativeHumidity, WeatherData.Value, GetIndex(Value));
+                WeatherData.Temperature, WeatherData.RelativeHumidity, Value, GetIndex(Value));
         }
 
         public static HeatIndex? GetIndex(double value)

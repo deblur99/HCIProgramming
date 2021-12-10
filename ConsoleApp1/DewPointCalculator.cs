@@ -63,8 +63,8 @@ namespace ConsoleApp1
 
         public override string ToString()
         {
-            return String.Format("DewPointCalculator [Temperature = {0}, RelativeHumidity = {1}, Value = {2}",
-                WeatherData.Temperature, WeatherData.RelativeHumidity, WeatherData.Value);
+            return String.Format("DewPointCalculator [Temperature={0}, RelativeHumidity={1}, Value={2}]",
+                WeatherData.Temperature, WeatherData.RelativeHumidity, Value);
         }
     }
 }
