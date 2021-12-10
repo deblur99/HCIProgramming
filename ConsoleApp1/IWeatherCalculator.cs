@@ -3,9 +3,9 @@
     interface IWeatherCalculator
     {
         void PrintTable();
-
+        
         void GetUserInput();
 
-        void Calculator();
+        void Calculate();
     }
 }

@@ -2,7 +2,7 @@
 
 namespace ConsoleApp1
 {
-    class WeatherData: IEquatable<WeatherData>
+    public class WeatherData: IEquatable<WeatherData>
     {
         DateTime DateTime { get; set; }
         double Temperature { get; set; } // fahrenheit
@@ -10,7 +10,7 @@ namespace ConsoleApp1
         double WindVelocity { get; set; }
         double Value { get; set; } // 계산값
 
-        WeatherData(DateTime datetime, double temperature, double relativeHumidity, double windVelocity)
+        protected WeatherData(DateTime datetime, double temperature, double relativeHumidity, double windVelocity)
         {
             DateTime = datetime;
             Temperature = temperature;
