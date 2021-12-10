@@ -1,12 +1,10 @@
 using System;
-using ConsoleApp1;
 
 namespace ConsoleApp1
 {
     public abstract class WeatherCalculator : IWeatherCalculator, IEquatable<WeatherCalculator>
     {
-        protected WeatherData WeatherData;
-        protected double Temperature; // fahrenheit
+        protected WeatherData WeatherData { get; set; }
 
         protected double Value // 자식클래스에서 공통으로 사용
         {

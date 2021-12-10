@@ -5,17 +5,27 @@ namespace ConsoleApp1
     public class WeatherData: IEquatable<WeatherData>
     {
         DateTime DateTime { get; set; }
-        double Temperature { get; set; } // fahrenheit
-        double RelativeHumidity { get; set; } // %
-        double WindVelocity { get; set; }
-        double Value { get; set; } // 계산값
+        public double Temperature { get; set; } // fahrenheit
+        public double RelativeHumidity { get; set; } // %
+        public double WindVelocity { get; set; }
+        public double Value { get; set; } // 계산값
 
-        protected WeatherData(DateTime datetime, double temperature, double relativeHumidity, double windVelocity)
+        public WeatherData(DateTime dataTime, double temperature, double relativeHumidity, double windVelocity)
         {
-            DateTime = datetime;
+            DateTime = dataTime;
             Temperature = temperature;
             RelativeHumidity = relativeHumidity;
             WindVelocity = windVelocity;
+        }
+
+        public WeatherData() : this(DateTime.Now, 0.0, 0.0, 0.0) { }
+
+        public WeatherData(WeatherData data)
+        {
+            DateTime = data.DateTime;
+            Temperature = data.Temperature;
+            RelativeHumidity = data.RelativeHumidity;
+            WindVelocity = data.WindVelocity;
         }
 
         public override string ToString()
